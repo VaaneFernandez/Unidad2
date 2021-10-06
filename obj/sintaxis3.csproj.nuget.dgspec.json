@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\sintaxis3\\sintaxis3.csproj": {}
+    "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\programasautoll\\sintaxis3.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\sintaxis3\\sintaxis3.csproj": {
+    "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\programasautoll\\sintaxis3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\sintaxis3\\sintaxis3.csproj",
+        "projectUniqueName": "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\programasautoll\\sintaxis3.csproj",
         "projectName": "sintaxis3",
-        "projectPath": "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\sintaxis3\\sintaxis3.csproj",
+        "projectPath": "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\programasautoll\\sintaxis3.csproj",
         "packagesPath": "C:\\Users\\hp personal\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\sintaxis3\\obj\\",
+        "outputPath": "C:\\Users\\hp personal\\Documents\\Semestre 5\\Automatas ll\\programasautoll\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\hp personal\\AppData\\Roaming\\NuGet\\NuGet.Config"

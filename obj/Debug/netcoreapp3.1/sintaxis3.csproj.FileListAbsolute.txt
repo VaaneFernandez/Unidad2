@@ -11,3 +11,16 @@ C:\Users\hp personal\Documents\Semestre 5\Automatas ll\sintaxis3\obj\Debug\netco
 C:\Users\hp personal\Documents\Semestre 5\Automatas ll\sintaxis3\obj\Debug\netcoreapp3.1\sintaxis3.dll
 C:\Users\hp personal\Documents\Semestre 5\Automatas ll\sintaxis3\obj\Debug\netcoreapp3.1\sintaxis3.pdb
 C:\Users\hp personal\Documents\Semestre 5\Automatas ll\sintaxis3\obj\Debug\netcoreapp3.1\sintaxis3.genruntimeconfig.cache
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\bin\Debug\netcoreapp3.1\sintaxis3.exe
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\bin\Debug\netcoreapp3.1\sintaxis3.deps.json
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\bin\Debug\netcoreapp3.1\sintaxis3.runtimeconfig.json
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\bin\Debug\netcoreapp3.1\sintaxis3.runtimeconfig.dev.json
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\bin\Debug\netcoreapp3.1\sintaxis3.dll
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\bin\Debug\netcoreapp3.1\sintaxis3.pdb
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.csprojAssemblyReference.cache
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.AssemblyInfoInputs.cache
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.AssemblyInfo.cs
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.csproj.CoreCompileInputs.cache
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.dll
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.pdb
+C:\Users\hp personal\Documents\Semestre 5\Automatas ll\programasautoll\obj\Debug\netcoreapp3.1\sintaxis3.genruntimeconfig.cache
