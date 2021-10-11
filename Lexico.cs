@@ -120,7 +120,7 @@ namespace sintaxis3
         //~Lexico()
         public void Dispose()
         {
-            Console.WriteLine("Finaliza compilacion de " + nombreArchivo);
+            Console.WriteLine("\nFinaliza compilacion de " + nombreArchivo);
             CerrarArchivos();
         }
 

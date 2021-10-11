@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-// Requerimiento 1: Implementar las secuencias de escape: \n, \t cuando se imprime una cadena y 
-//                  eliminar las dobles comillas.
-// Requerimiento 2: Levantar excepciones en la clase Stack. si
-// Requerimiento 3: Agregar el tipo de dato en el Inserta de ListaVariables.si
-// Requerimiento 4: Validar existencia o duplicidad de variables. Mensaje de error: si
-//                  "Error de sintaxis: La variable (x26) no ha sido declarada."
-//                  "Error de sintaxis: La variables (x26) está duplicada." 
-// Requerimiento 5: Modificar el valor de la variable o constante al momento de su declaración.
+//    Requerimiento 1: Implementar el not en el if
+//    Requerimiento 2: Validar asignación de strings en Instruccion
+//    Requerimiento 3: Implementar la comparación de tipos de datos en Lista_IDs
+//    Requerimiento 4: Validar los tipos de datos en la asignacion del cin
+//    Requerimiento 5: Implementar el cast
+
 
 namespace sintaxis3
 {
@@ -17,6 +15,7 @@ namespace sintaxis3
     {
         Stack s;
         ListaVariables l;
+        Variable.tipo maxBytes;
         public Lenguaje()
         {
             s = new Stack(5);
@@ -69,21 +68,21 @@ namespace sintaxis3
             match("(");
             match(")");
 
-            BloqueInstrucciones();
+            BloqueInstrucciones(true);
         }
 
         // BloqueInstrucciones -> { Instrucciones }
-        private void BloqueInstrucciones()
+        private void BloqueInstrucciones(bool ejecuta)
         {
             match(clasificaciones.inicioBloque);
 
-            Instrucciones();
+            Instrucciones(ejecuta);
 
             match(clasificaciones.finBloque);
         }
 
         // Lista_IDs -> identificador (= Expresion)? (,Lista_IDs)? 
-        private void Lista_IDs(string contenidoDat)
+        private void Lista_IDs(string contenidoDat, bool ejecuta)
         {
             string nombre = getContenido();
             match(clasificaciones.identificador); // Validar duplicidad
@@ -123,57 +122,79 @@ namespace sintaxis3
                 if (getClasificacion() == clasificaciones.cadena)
                 {
                     valor = getContenido();
-                    match(clasificaciones.cadena);
+                    if (contenidoDat == "string")
+                    {
+                        match(clasificaciones.cadena);
+                    }
+                    else
+                    {
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un STRING a un (" + contenidoDat + ") " + "(" + linea + ", " + caracter + ")");
+                    }
                 }
                 else
                 {
+                    //Requerimiento 3
                     Expresion();
+                    maxBytes = Variable.tipo.CHAR;
                     valor = s.pop(bitacora, linea, caracter).ToString();
+                    if (tipoDatoExpresion(float.Parse(valor)) > maxBytes)
+                    {
+                        maxBytes = tipoDatoExpresion(float.Parse(valor));
+                    }
+                    if (maxBytes > l.getTipoDato(nombre))
+                    {
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un " + maxBytes + " a un (" + l.getTipoDato(nombre) + ") " + "(" + linea + ", " + caracter + ")");
+                    }
                 }
 
 
 
             }
-            l.setValor(nombre, valor);
+
+            if (ejecuta)
+            {
+                l.setValor(nombre, valor);
+            }
+
 
             if (getContenido() == ",")
             {
                 match(",");
-                Lista_IDs(contenidoDat);
+                Lista_IDs(contenidoDat, ejecuta);
             }
         }
 
         // Variables -> tipoDato Lista_IDs; 
-        private void Variables()
+        private void Variables(bool ejecuta)
         {
             string contenidoDat = getContenido();
             match(clasificaciones.tipoDato);
-            Lista_IDs(contenidoDat);
+            Lista_IDs(contenidoDat, ejecuta);
             match(clasificaciones.finSentencia);
         }
 
         // Instruccion -> (If | cin | cout | const | Variables | asignacion) ;
-        private void Instruccion()
+        private void Instruccion(bool ejecuta)
         {
             if (getContenido() == "do")
             {
-                DoWhile();
+                DoWhile(ejecuta);
             }
             else if (getContenido() == "while")
             {
-                While();
+                While(ejecuta);
             }
             else if (getContenido() == "for")
             {
-                For();
+                For(ejecuta);
             }
             else if (getContenido() == "if")
             {
-                If();
+                If(ejecuta);
             }
             else if (getContenido() == "cin")
             {
-                // Requerimiento 5
+                // Requerimiento 4
                 match("cin");
                 match(clasificaciones.flujoEntrada);
                 string nombre = getContenido();
@@ -182,25 +203,56 @@ namespace sintaxis3
                 {
                     throw new Error(bitacora, "Error de sintaxis: Variable no existe (" + nombre + ") " + "(" + linea + ", " + caracter + ")");
 
+
                 }
 
-                string valor = Console.ReadLine();
-                l.setValor(nombre, valor);
+                if (ejecuta)
+                {
+                    string valor;
+                    if (l.getTipoDato(nombre) == Variable.tipo.STRING)
+                    {
+                        valor = Console.ReadLine();
+                        
+                    }
+                    else
+                    {
+                        maxBytes = Variable.tipo.CHAR;
+                        valor = Console.ReadLine();
+                        float auxTry;
+                        if (float.TryParse(valor, out auxTry))
+                        {
+                            if (tipoDatoExpresion(auxTry)> maxBytes)
+                            {
+                                maxBytes = tipoDatoExpresion(auxTry);
+                                
+                            }
+                            if (maxBytes > l.getTipoDato(nombre))
+                            {
+                                throw new Error(bitacora, "Error semantico: No se puede asignar un " + maxBytes + " a un (" + l.getTipoDato(nombre) + ") " + "(" + linea + ", " + caracter + ")");
+                            }
+                        }else
+                        {
+                            throw new Error(bitacora, "Error semantico: No se puede asignar un STRING a un (" + l.getTipoDato(nombre) + ") " + "(" + linea + ", " + caracter + ")");
+                        }
+                    }
+                    l.setValor(nombre, valor);
+                }
+
                 match(clasificaciones.finSentencia);
             }
             else if (getContenido() == "cout")
             {
                 match("cout");
-                ListaFlujoSalida();
+                ListaFlujoSalida(ejecuta);
                 match(clasificaciones.finSentencia);
             }
             else if (getContenido() == "const")
             {
-                Constante();
+                Constante(ejecuta);
             }
             else if (getClasificacion() == clasificaciones.tipoDato)
             {
-                Variables();
+                Variables(ejecuta);
             }
             else
             {
@@ -215,41 +267,63 @@ namespace sintaxis3
 
                 string valor;
 
+                //Requerimiento 2
                 if (getClasificacion() == clasificaciones.cadena)
                 {
-                    valor = getContenido();
-                    match(clasificaciones.cadena);
+                    if (l.getTipoDato(nombre) == Variable.tipo.STRING)
+                    {
+                        valor = getContenido();
+                        match(clasificaciones.cadena);
+                    }
+                    else
+                    {
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un STRING a un (" + l.getTipoDato(nombre) + ") " + "(" + linea + ", " + caracter + ")");
+                    }
                 }
                 else
                 {
+                    //Requerimiento 3
                     Expresion();
+                    maxBytes = Variable.tipo.CHAR;
                     valor = s.pop(bitacora, linea, caracter).ToString();
+                    if (tipoDatoExpresion(float.Parse(valor)) > maxBytes)
+                    {
+                        maxBytes = tipoDatoExpresion(float.Parse(valor));
+                    }
+                    if (maxBytes > l.getTipoDato(nombre))
+                    {
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un " + maxBytes + " a un (" + l.getTipoDato(nombre) + ") " + "(" + linea + ", " + caracter + ")");
+                    }
                 }
 
-                l.setValor(nombre, valor);
+                if (ejecuta)
+                {
+                    l.setValor(nombre, valor);
+                }
+
                 match(clasificaciones.finSentencia);
             }
         }
 
         // Instrucciones -> Instruccion Instrucciones?
-        private void Instrucciones()
+        private void Instrucciones(bool ejecuta)
         {
-            Instruccion();
+            Instruccion(ejecuta);
 
             if (getClasificacion() != clasificaciones.finBloque)
             {
-                Instrucciones();
+                Instrucciones(ejecuta);
             }
         }
 
         // Constante -> const tipoDato identificador = numero | cadena;
-        private void Constante()
+        private void Constante(bool ejecuta)
         {
             match("const");
             string contenidoDat = getContenido();
             match(clasificaciones.tipoDato);
             string nombre = getContenido();
-            if (!l.Existe(nombre))
+            if (!l.Existe(nombre) && ejecuta)
             {
                 match(clasificaciones.identificador); // Validar duplicidad
                 switch (contenidoDat)
@@ -290,62 +364,76 @@ namespace sintaxis3
                 valor = s.pop(bitacora, linea, caracter).ToString();
             }
 
-            l.setValor(nombre, valor);
+            if (ejecuta)
+            {
+                l.setValor(nombre, valor);
+            }
+
 
             match(clasificaciones.finSentencia);
         }
 
         // ListaFlujoSalida -> << cadena | identificador | numero (ListaFlujoSalida)?
-        private void ListaFlujoSalida()
+        private void ListaFlujoSalida(bool ejecuta)
         {
             match(clasificaciones.flujoSalida);
 
             if (getClasificacion() == clasificaciones.numero)
             {
-                Console.Write(getContenido());
+                if (ejecuta)
+                {
+                    Console.Write(getContenido());
+                }
+
                 match(clasificaciones.numero);
             }
             else if (getClasificacion() == clasificaciones.cadena)
             {
                 string guardaCadena = getContenido();
                 guardaCadena = guardaCadena.Replace("\"", "");
-                if (guardaCadena.Contains("\\n"))
+                if (ejecuta)
                 {
-                    int inde = guardaCadena.IndexOf("\\n");
-                    int varaux = 0;
-                    foreach (char c in guardaCadena)
+
+                    if (guardaCadena.Contains("\\n"))
                     {
-                        if (c == '\\')
+                        int inde = guardaCadena.IndexOf("\\n");
+                        int varaux = 0;
+                        foreach (char c in guardaCadena)
                         {
-                            if (varaux == inde)
+                            if (c == '\\')
                             {
-                                Console.WriteLine();
+                                if (varaux == inde)
+                                {
+                                    Console.WriteLine();
+                                }
                             }
+                            varaux++;
                         }
-                        varaux++;
+                        guardaCadena = guardaCadena.Replace("\\n", "");
                     }
-                    guardaCadena = guardaCadena.Replace("\\n", "");
+
+                    if (guardaCadena.Contains("\\t"))
+                    {
+                        int inde = guardaCadena.IndexOf("\\t");
+                        int varaux = 0;
+                        foreach (char c in guardaCadena)
+                        {
+                            if (c == '\\')
+                            {
+                                if (varaux == inde)
+                                {
+                                    Console.Write("\t");
+                                }
+                            }
+                            varaux++;
+                        }
+                        guardaCadena = guardaCadena.Replace("\\t", "");
+                    }
+
+
+                    Console.Write(guardaCadena);
                 }
 
-                if (guardaCadena.Contains("\\t"))
-                {
-                    int inde = guardaCadena.IndexOf("\\t");
-                    int varaux = 0;
-                    foreach (char c in guardaCadena)
-                    {
-                        if (c == '\\')
-                        {
-                            if (varaux == inde)
-                            {
-                                Console.Write("\t");
-                            }
-                        }
-                        varaux++;
-                    }
-                    guardaCadena = guardaCadena.Replace("\\t", "");
-                }
-
-                Console.Write(guardaCadena);
                 match(clasificaciones.cadena);
             }
             else
@@ -355,7 +443,11 @@ namespace sintaxis3
                 {
                     throw new Error(bitacora, "Error de sintaxis: Variable no existe (" + nombre + ") " + "(" + linea + ", " + caracter + ")");
                 }
-                Console.Write(l.getValor(nombre));
+
+                if (ejecuta)
+                {
+                    Console.Write(l.getValor(nombre));
+                }
                 match(clasificaciones.identificador); // Validar existencia 
 
 
@@ -363,32 +455,71 @@ namespace sintaxis3
 
             if (getClasificacion() == clasificaciones.flujoSalida)
             {
-                ListaFlujoSalida();
+                ListaFlujoSalida(ejecuta);
             }
         }
 
         // If -> if (Condicion) { BloqueInstrucciones } (else BloqueInstrucciones)?
-        private void If()
+        private void If(bool ejecuta2)
         {
+            bool ejecuta;
             match("if");
             match("(");
-            Condicion();
+            if (getContenido() == "!")
+            {
+                match("!");
+                match("(");
+                ejecuta = !Condicion();
+                match(")");
+            }
+            else
+            {
+                ejecuta = Condicion();
+            }
             match(")");
-            BloqueInstrucciones();
+            BloqueInstrucciones(ejecuta && ejecuta2);
 
             if (getContenido() == "else")
             {
                 match("else");
-                BloqueInstrucciones();
+                BloqueInstrucciones(!ejecuta && ejecuta2);
             }
         }
 
         // Condicion -> Expresion operadorRelacional Expresion
-        private void Condicion()
+        private bool Condicion()
         {
+            maxBytes = Variable.tipo.CHAR;
             Expresion();
+            float n1 = s.pop(bitacora, linea, caracter);
+            string operador = getContenido();
             match(clasificaciones.operadorRelacional);
+            maxBytes = Variable.tipo.CHAR;
             Expresion();
+            float n2 = s.pop(bitacora, linea, caracter);
+
+
+            switch (operador)
+            {
+                case ">":
+                    return n1 > n2;
+
+                case ">=":
+                    return n1 >= n2;
+
+                case "<":
+                    return n1 < n2;
+
+                case "<=":
+                    return n1 <= n2;
+
+                case "==":
+                    return n1 == n2;
+
+                default:
+                    return n1 != n2;
+
+            }
         }
 
         // x26 = (3+5)*8-(10-4)/2;
@@ -469,6 +600,11 @@ namespace sintaxis3
                 }
                 s.push(float.Parse(l.getValor(nombre)), bitacora, linea, caracter);
 
+                if (l.getTipoDato(nombre) > maxBytes)
+                {
+                    maxBytes = l.getTipoDato(nombre);
+                }
+
 
             }
             else if (getClasificacion() == clasificaciones.numero)
@@ -476,18 +612,50 @@ namespace sintaxis3
                 // Console.Write(getContenido() + " ");
                 s.push(float.Parse(getContenido()), bitacora, linea, caracter);
                 s.display(bitacora);
+                if (tipoDatoExpresion(float.Parse(getContenido())) > maxBytes)
+                {
+                    maxBytes = tipoDatoExpresion(float.Parse(getContenido()));
+                }
                 match(clasificaciones.numero);
             }
             else
             {
                 match("(");
+                bool huboCast = false;
+                Variable.tipo tipoDato = Variable.tipo.CHAR;
+                if (getClasificacion() == clasificaciones.tipoDato)
+                {
+                    huboCast = true;
+                    tipoDato = determinarTipoDato(getContenido());
+                    match(clasificaciones.tipoDato);
+                    match(")");
+                    match("(");
+                }
                 Expresion();
                 match(")");
+                if (huboCast)
+                {
+                    //si hubo cast hacer un pop y convertir ese numero a tipoDato y meterlo al stack
+                    float n1 = s.pop(bitacora, linea, caracter);
+                    //Para convertir un entero a char necesitamos dividir entre 256 y el residuo
+                    //es el resultado del cast 256=0, 257=1, 258=2, ...
+                    //Para convertir un flotante a entero necesitamos dividir entre 65536 y el residuo
+                    //es el resultado del cast
+                    //Para convertir un flotante a otro tipo de dato, redondear el numero para eliminar
+                    //la parte fraccional.
+                    //Para convertir un flotante a char necesitamos dividir entre 65536/256 y el residuo
+                    //es el resultado del cast
+                    //Para convertir a float n1 = n1
+                    //n1 = cast(n1, tipoDato);
+                    n1 = cast(n1, tipoDato);
+                    s.push(n1, bitacora, linea, caracter);
+                    maxBytes = tipoDato;
+                }
             }
         }
 
         // For -> for (identificador = Expresion; Condicion; identificador incrementoTermino) BloqueInstrucciones
-        private void For()
+        private void For(bool ejecuta)
         {
             match("for");
 
@@ -520,11 +688,11 @@ namespace sintaxis3
 
             match(")");
 
-            BloqueInstrucciones();
+            BloqueInstrucciones(ejecuta);
         }
 
         // While -> while (Condicion) BloqueInstrucciones
-        private void While()
+        private void While(bool ejecuta)
         {
             match("while");
 
@@ -532,26 +700,84 @@ namespace sintaxis3
             Condicion();
             match(")");
 
-            BloqueInstrucciones();
+            BloqueInstrucciones(ejecuta);
         }
 
         // DoWhile -> do BloqueInstrucciones while (Condicion);
-        private void DoWhile()
+        private void DoWhile(bool ejecuta)
         {
             match("do");
 
-            BloqueInstrucciones();
+            BloqueInstrucciones(ejecuta);
 
             match("while");
 
             match("(");
-            Condicion(); 
+            Condicion();
             match(")");
             match(clasificaciones.finSentencia);
         }
 
-        // x26 = (3 + 5) * 8 - (10 - 4) / 2
-        // x26 = 3 + 5 * 8 - 10 - 4 / 2
-        // x26 = 3 5 + 8 * 10 4 - 2 / -
+        private Variable.tipo tipoDatoExpresion(float valor)
+        {
+            if (valor % 1 != 0)
+            {
+                return Variable.tipo.FLOAT;
+            }
+            else if (valor < 256)
+            {
+                return Variable.tipo.CHAR;
+            }
+            else if (valor < 65535)
+            {
+                return Variable.tipo.INT;
+            }
+            return Variable.tipo.FLOAT;
+        }
+
+        private Variable.tipo determinarTipoDato(string tipoDato)
+        {
+            Variable.tipo tipoVar;
+
+            switch (tipoDato)
+            {
+                case "int":
+                    tipoVar = Variable.tipo.INT;
+                    break;
+
+                case "float":
+                    tipoVar = Variable.tipo.FLOAT;
+                    break;
+
+                case "string":
+                    tipoVar = Variable.tipo.STRING;
+                    break;
+
+                default:
+                    tipoVar = Variable.tipo.CHAR;
+                    break;
+            }
+
+            return tipoVar;
+        }
+
+        private float cast(float n1, Variable.tipo tipoDato)
+        {
+            if (tipoDatoExpresion(n1) == Variable.tipo.INT && tipoDato == Variable.tipo.CHAR)
+            {
+                n1 = n1 % 256;
+            }
+            else if (tipoDatoExpresion(n1) == Variable.tipo.FLOAT && tipoDato == Variable.tipo.CHAR)
+            {
+                n1 = (float)(Math.Round(n1));
+                n1 = n1 % 65536 % 256;
+            }
+            else if (tipoDatoExpresion(n1) == Variable.tipo.FLOAT && tipoDato == Variable.tipo.INT)
+            {
+                n1 = (float)(Math.Round(n1));
+                n1 = n1 % 65536;
+            }
+            return n1;
+        }
     }
 }
